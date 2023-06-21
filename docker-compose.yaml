@@ -1,0 +1,19 @@
+version: '3.5'
+
+services:
+    styler:
+        image: styler_bot_img:latest
+        container_name: styler_bot
+        env_file: .env
+        volumes:
+            - ./source:/root/project
+
+#    db:
+#        image: postgres
+#        container_name: styler_db
+#        ports:
+#            - "5432:5432"
+#        environment:
+#            - POSTGRES_USER=postgres
+#            - POSTGRES_PASSWORD=thoh7eTh
+#            - POSTGRES_DB=converty
