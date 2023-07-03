@@ -1,2 +1,7 @@
+numpy
+pandas
+tqdm
 aiogram
 Pillow
+torch
+torchvision
