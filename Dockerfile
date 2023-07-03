@@ -5,4 +5,4 @@ WORKDIR /root/project/
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
 # run app
-CMD ["python", "telegram_bot.py"]
+CMD ["python", "main.py"]

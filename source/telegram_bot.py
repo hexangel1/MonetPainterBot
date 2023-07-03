@@ -1,22 +1,20 @@
-"""Converter telegram bot, command processing"""
+""" Telegram bot endpoints """
 import os
-import signal
 import shutil
-import configparser
+import torch
+
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
-from aiogram.utils import executor
+from aiogram.types import InputFile
+from model import CycleGAN
 
-#config = configparser.ConfigParser()
+
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+gan = CycleGAN(3, 3, 60, device)
+gan.load_from_checkpoint(ckpt_path=os.environ['CHECKPOINT_PATH'])
 
 bot = Bot(token=os.environ['TG_BOT_TOKEN'])
 dp = Dispatcher(bot)
-
-
-def signal_handler(signum, frame):
-    """Signal handler"""
-    if signum == signal.SIGTERM:
-        os._exit(0)
 
 
 @dp.message_handler(commands=['start'])
@@ -58,6 +56,7 @@ async def handle_help(msg: types.Message):
 @dp.message_handler(content_types=['text'])
 async def handle_text_message(msg: types.Message):
     """Text handler"""
+    
     mesg = msg.text[::-1]
     await msg.answer(mesg)
 
@@ -72,9 +71,13 @@ async def handle_photo_message(msg: types.Message):
     file_ID = msg.photo[-1].file_id
     file_info = await bot.get_file(file_ID)
     downloaded_file = await bot.download_file(file_info.file_path)
-    with open(f"storage/{msg.from_user.id}/{file_ID}.png", "wb") as new_file:
+    image_path = f"storage/{msg.from_user.id}/{file_ID}"
+    styled_image_path = f"storage/{msg.from_user.id}/result.png"
+    with open(image_path, "wb") as new_file:
         new_file.write(downloaded_file.getvalue())
-    await msg.answer("Photo uploaded!")
+
+    gan.transfer_style(image_path, styled_image_path)
+    await bot.send_photo(msg.chat.id, photo=InputFile(styled_image_path), caption="Monet styled photo")
 
 
 @dp.message_handler(content_types=['document'])
@@ -91,12 +94,3 @@ async def handle_document_message(msg: types.Message):
     with open(f"storage/{msg.from_user.id}/{file_ID}={file.file_name}", "wb") as new_file:
         new_file.write(downloaded_file.getvalue())
     await msg.answer("Document uploaded!")
-
-
-if __name__ == '__main__':
-    try:
-        os.mkdir("storage", mode=0o755)
-    except FileExistsError:
-        pass
-    signal.signal(signal.SIGTERM, signal_handler)
-    executor.start_polling(dp)
