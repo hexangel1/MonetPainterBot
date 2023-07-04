@@ -2,16 +2,20 @@
 import os
 import shutil
 import torch
-
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
 from aiogram.types import InputFile
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 from model import CycleGAN
 
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 gan = CycleGAN(3, 3, 60, device)
 gan.load_from_checkpoint(ckpt_path=os.environ['CHECKPOINT_PATH'])
+
+keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
+keyboard.add(KeyboardButton('/transfer_style'))
+keyboard.add(KeyboardButton('/help'))
 
 bot = Bot(token=os.environ['TG_BOT_TOKEN'])
 dp = Dispatcher(bot)
@@ -28,8 +32,10 @@ async def handle_start(msg: types.Message):
         os.mkdir(f"storage/{msg.from_user.id}", mode=0o755)
     except FileExistsError:
         pass
-    await msg.answer(("Hi, dear {fname}, I am transfer style bot 😎\n"
-                     "Use /help command to find out what I can do\n").format(fname=msg.from_user.first_name))
+    await msg.answer("Hi, dear {fname}! 😎\n"
+                    "I am MonetStyleBot 🤖\n"
+                    "Use /help command to find out what I can do\n".format(fname=msg.from_user.first_name),
+                    reply_markup=keyboard)
 
 
 @dp.message_handler(commands=['stop'])
