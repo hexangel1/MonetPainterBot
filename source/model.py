@@ -211,13 +211,13 @@ class CycleGAN(object):
         ])
         transform2Image = transforms.ToPILImage()
 
-        image = Image.open(image_path, "r")
-        img_tensor = transform2Tensor(image)
-        
+        with Image.open(image_path, "r") as image:
+            img_tensor = transform2Tensor(image)
         with torch.no_grad():
-            pred_monet = unnorm(self.gen_ptm(img_tensor.to(self.device)).cpu().detach())
-            img = transform2Image(pred_monet).convert("RGB")
-            img.save(output_path, "PNG")
+            pred_monet = self.gen_ptm(img_tensor.to(self.device)).cpu().detach()
+        pred_monet = unnorm(pred_monet)
+        image_monet = transform2Image(pred_monet).convert("RGB")
+        image_monet.save(output_path, "PNG")
 
     def train(self, photo_dl):
         for epoch in range(self.epochs):
