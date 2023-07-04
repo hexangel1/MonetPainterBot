@@ -56,7 +56,13 @@ async def handle_help(msg: types.Message):
     :param msg: message from user
     :type msg: aiogram.types.Message
     """
-    await msg.answer("not implemented")
+    await msg.answer(
+        "Use commands:\n"
+        "/start to launch the bot\n"
+        "/stop to stop the bot\n"
+        "/help to see this message\n"
+        "/transfer_style to pass image to neural network"
+    )
 
 
 @dp.message_handler(content_types=['text'])
