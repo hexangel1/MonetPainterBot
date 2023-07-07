@@ -30,4 +30,4 @@ Telegram бот, позволяющий придавать изображени�
 * Перед отправкой следующей картинки необходимо 
 также отправить команду `/transfer_style` или нажать на кнопку.
 
-![Тест](https://github.com/hexangel1/TransferStyleBot/blob/main/screenshots/screenshot13.png)
+<img src="https://user-images.githubusercontent.com/link-to-your-image.png" width="200" />
