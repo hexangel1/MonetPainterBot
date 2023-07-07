@@ -1,4 +1,4 @@
-""" Main """
+"""Main"""
 import os
 import signal
 import telegram_bot
@@ -12,6 +12,7 @@ def signal_handler(signum, frame):
 
 
 def main():
+    """Entrypoint"""
     try:
         os.mkdir("storage", mode=0o755)
     except FileExistsError:

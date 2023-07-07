@@ -1,4 +1,4 @@
-""" Image Dataset """
+"""Image Dataset"""
 import os
 import numpy as np
 from PIL import Image
@@ -16,7 +16,7 @@ class ImageDataset(Dataset):
         self.transform = transforms.Compose([
             transforms.Resize(size),
             transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))                                
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
         ])
         for i, fl in enumerate(os.listdir(self.monet_dir)):
             self.monet_idx[i] = fl
@@ -35,4 +35,3 @@ class ImageDataset(Dataset):
 
     def __len__(self):
         return min(len(self.monet_idx.keys()), len(self.photo_idx.keys()))
-    

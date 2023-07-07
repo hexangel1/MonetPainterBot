@@ -1,4 +1,4 @@
-""" Telegram bot endpoints """
+"""Telegram bot endpoints"""
 import os
 import sys
 import shutil
@@ -25,11 +25,14 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 
 
 class CustomStates(StatesGroup):
+    """Client states"""
+
     bot_started = State()
     upload_image = State()
 
 
 def clear_userdir(user_id: int):
+    """Delete files in user directory"""
     for file in os.listdir(f"storage/{user_id}/"):
         if os.path.isfile(f"storage/{user_id}/{file}"):
             os.remove(f"storage/{user_id}/{file}")
@@ -44,10 +47,9 @@ async def handle_start(msg: types.Message, state: FSMContext):
     """
     os.makedirs(f"storage/{msg.from_user.id}/", exist_ok=True, mode=0o755)
     await CustomStates.bot_started.set()
-    await msg.answer("Hi, dear {fname}! 😎\n"
-                    "I am MonetStyleBot 🤖\n"
-                    "Use /help command to find out what I can do\n".format(fname=msg.from_user.first_name),
-                    reply_markup=keyboard)
+    await msg.answer("Hi, dear {msg.from_user.first_name}! 😎\n"
+                     "I am Monet Painter Bot 🤖\n"
+                     "Use /help command to find out what I can do\n", reply_markup=keyboard)
 
 
 @dp.message_handler(commands=['stop'], state=CustomStates)
@@ -60,7 +62,7 @@ async def handle_stop(msg: types.Message, state: FSMContext):
     shutil.rmtree(f"storage/{msg.from_user.id}/", ignore_errors=True)
     await state.finish()
     await msg.answer("Goodbye, dear {fname}".format(fname=msg.from_user.first_name),
-                    reply_markup=ReplyKeyboardRemove())
+                     reply_markup=ReplyKeyboardRemove())
 
 
 @dp.message_handler(commands=['help'], state='*')

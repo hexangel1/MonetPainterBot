@@ -1,4 +1,4 @@
-""" CycleGAN model """
+"""CycleGAN model"""
 import itertools
 import numpy as np
 import torch
@@ -7,7 +7,7 @@ import torchvision.transforms as transforms
 from PIL import Image
 from tqdm.notebook import tqdm
 
-from utils import(
+from utils import (
     unnorm,
     update_req_grad,
     init_weights,
@@ -17,6 +17,7 @@ from utils import(
 
 
 def Upsample(in_ch, out_ch, use_dropout=True, dropout_ratio=0.5):
+    """Upsample block"""
     if use_dropout:
         return nn.Sequential(
             nn.ConvTranspose2d(in_ch, out_ch, 3, stride=2, padding=1, output_padding=1),
@@ -30,9 +31,10 @@ def Upsample(in_ch, out_ch, use_dropout=True, dropout_ratio=0.5):
             nn.InstanceNorm2d(out_ch),
             nn.GELU()
         )
-    
+
 
 def Convlayer(in_ch, out_ch, kernel_size=3, stride=2, use_leaky=True, use_inst_norm=True, use_pad=True):
+    """Convlayer block"""
     if use_pad:
         conv = nn.Conv2d(in_ch, out_ch, kernel_size, stride, 1, bias=True)
     else:
@@ -52,6 +54,8 @@ def Convlayer(in_ch, out_ch, kernel_size=3, stride=2, use_leaky=True, use_inst_n
 
 
 class Resblock(nn.Module):
+    """Resblock"""
+
     def __init__(self, in_features, dropout_ratio=0.5):
         super().__init__()
         layers = list()
@@ -65,10 +69,12 @@ class Resblock(nn.Module):
 
     def forward(self, x):
         return x + self.res(x)
-    
+
 
 class Generator(nn.Module):
-    def __init__(self, in_ch, out_ch, num_res_blocks=6):
+    """Generator implementation"""
+
+    def __init__(self, in_ch, out_ch, num_res_blocks=10):
         super().__init__()
         layers = list()
         layers.append(nn.ReflectionPad2d(3))
@@ -86,29 +92,33 @@ class Generator(nn.Module):
 
     def forward(self, x):
         return self.gen(x)
-    
+
 
 class Discriminator(nn.Module):
-    def __init__(self, in_ch, num_layers=4):
+    """Dicriminator implementation"""
+
+    def __init__(self, in_ch, num_layers=6):
         super().__init__()
         layers = list()
         layers.append(nn.Conv2d(in_ch, 64, 4, stride=2, padding=1))
         layers.append(nn.LeakyReLU(0.2, inplace=True))
         for i in range(1, num_layers):
-            in_chs = 64 * 2**(i-1)
+            in_chs = 64 * 2 ** (i - 1)
             out_chs = in_chs * 2
-            if i == num_layers-1:
+            if i == num_layers - 1:
                 layers.append(Convlayer(in_chs, out_chs, 4, 1))
             else:
                 layers.append(Convlayer(in_chs, out_chs, 4, 2))
-        layers.append(nn.Conv2d(512, 1, kernel_size=4, stride=1, padding=1))
+        layers.append(nn.Conv2d(2048, 1, kernel_size=4, stride=1, padding=1))
         self.disc = nn.Sequential(*layers)
 
     def forward(self, x):
         return self.disc(x)
-    
+
 
 class ImageBuffer(object):
+    """Image Buffer"""
+
     def __init__(self, max_imgs=50):
         self.buff_size = max_imgs
         self.buff_used = 0
@@ -129,9 +139,11 @@ class ImageBuffer(object):
                 else:
                     retval.append(img)
         return retval
-    
+
 
 class LRSched():
+    """Control learning rate value by during epochs"""
+
     def __init__(self, decay_epochs=100, total_epochs=200):
         self.decay_epochs = decay_epochs
         self.total_epochs = total_epochs
@@ -140,14 +152,16 @@ class LRSched():
         if epoch_num <= self.decay_epochs:
             return 1.0
         else:
-            fract = (epoch_num - self.decay_epochs)  / (self.total_epochs - self.decay_epochs)
+            fract = (epoch_num - self.decay_epochs) / (self.total_epochs - self.decay_epochs)
             return 1.0 - fract
 
 
 class CycleGAN(object):
+    """CycleGAN class"""
+
     def __init__(self, in_ch, out_ch, epochs, device, start_lr=2e-4, alpha=10, beta=5, decay_epoch=-1):
         self.epochs = epochs
-        self.decay_epoch = decay_epoch if decay_epoch > 0 else int(epochs/2)
+        self.decay_epoch = decay_epoch if decay_epoch > 0 else int(epochs / 2)
         self.alpha = alpha
         self.beta = beta
         self.device = device
@@ -159,9 +173,9 @@ class CycleGAN(object):
         self.mse_loss = nn.MSELoss()
         self.l1_loss = nn.L1Loss()
         self.optim_gen = torch.optim.Adam(itertools.chain(self.gen_mtp.parameters(), self.gen_ptm.parameters()),
-                                            lr = start_lr, betas=(0.5, 0.999))
+                                          lr=start_lr, betas=(0.5, 0.999))
         self.optim_disc = torch.optim.Adam(itertools.chain(self.disc_m.parameters(), self.disc_p.parameters()),
-                                            lr=start_lr, betas=(0.5, 0.999))
+                                           lr=start_lr, betas=(0.5, 0.999))
         self.monet_buffer = ImageBuffer()
         self.photo_buffer = ImageBuffer()
         gen_lr = LRSched(self.decay_epoch, self.epochs)
@@ -170,7 +184,7 @@ class CycleGAN(object):
         self.disc_lr_sched = torch.optim.lr_scheduler.LambdaLR(self.optim_disc, disc_lr.step)
         self.gen_losses = []
         self.disc_losses = []
-        
+
     def init_models(self):
         init_weights(self.gen_mtp)
         init_weights(self.gen_ptm)
@@ -180,7 +194,7 @@ class CycleGAN(object):
         self.gen_ptm = self.gen_ptm.to(self.device)
         self.disc_m = self.disc_m.to(self.device)
         self.disc_p = self.disc_p.to(self.device)
-        
+
     def load_from_checkpoint(self, ckpt_path):
         ckpt = load_checkpoint(ckpt_path, map_location=self.device)
         self.epochs = ckpt['epoch']
@@ -193,7 +207,7 @@ class CycleGAN(object):
 
     def save_current_state(self, epoch, ckpt_path):
         save_dict = {
-            'epoch': epoch+1,
+            'epoch': epoch + 1,
             'gen_mtp': self.gen_mtp.state_dict(),
             'gen_ptm': self.gen_ptm.state_dict(),
             'disc_m': self.disc_m.state_dict(),
@@ -205,16 +219,20 @@ class CycleGAN(object):
 
     def transfer_style(self, image_path, output_path):
         transform2Tensor = transforms.Compose([
-            transforms.Resize(256),
+            transforms.Resize(600),
             transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))                           
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
         ])
         transform2Image = transforms.ToPILImage()
 
         with Image.open(image_path, "r") as image:
             img_tensor = transform2Tensor(image)
+        print(img_tensor.shape, flush=True)
         with torch.no_grad():
             pred_monet = self.gen_ptm(img_tensor.to(self.device)).cpu().detach()
+            pred2 = self.disc_p(img_tensor.to(self.device)).cpu().detach()
+        print(pred2.shape, flush=True)
+        print(pred_monet.shape, flush=True)
         pred_monet = unnorm(pred_monet)
         image_monet = transform2Image(pred_monet).convert("RGB")
         image_monet.save(output_path, "PNG")
@@ -226,7 +244,7 @@ class CycleGAN(object):
             t = tqdm(photo_dl, leave=False, total=photo_dl.__len__())
             for _, (real_photo, real_monet) in enumerate(t):
                 real_photo, real_monet = real_photo.to(self.device), real_monet.to(self.device)
-                
+
                 # learn generator
                 update_req_grad([self.disc_m, self.disc_p], False)
                 self.optim_gen.zero_grad()
@@ -255,10 +273,9 @@ class CycleGAN(object):
                 adv_loss_photo = self.mse_loss(photo_disc, torch.ones(photo_disc.size()).to(self.device))
 
                 # total generator loss
-                total_gen_loss = cycle_loss_monet + cycle_loss_photo +\
-                                adv_loss_monet + adv_loss_photo +\
-                                idt_loss_monet + idt_loss_photo
-                
+                total_gen_loss = cycle_loss_monet + cycle_loss_photo + \
+                    adv_loss_monet + adv_loss_photo + idt_loss_monet + idt_loss_photo
+
                 avg_gen_loss += total_gen_loss.item()
 
                 # backward pass
@@ -300,9 +317,9 @@ class CycleGAN(object):
                 # backward pass
                 total_disc_loss.backward()
                 self.optim_disc.step()
-                
+
                 t.set_postfix(gen_loss=total_gen_loss.item(), disc_loss=total_disc_loss.item())
-        
+
             self.save_current_state(epoch, 'current_weights.ckpt')
 
             self.gen_lr_sched.step()
@@ -312,6 +329,6 @@ class CycleGAN(object):
             avg_disc_loss /= photo_dl.__len__()
             self.gen_losses.append(avg_gen_loss)
             self.disc_losses.append(avg_disc_loss)
-            
+
             print(f"Epoch: {epoch+1}/{self.epochs}\n"
                   f"Generator Loss: {avg_gen_loss} | Discriminator Loss: {avg_disc_loss}\n")
