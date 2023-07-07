@@ -114,7 +114,7 @@ async def handle_photo_message(msg: types.Message, state: FSMContext):
         new_file.write(downloaded_file.getvalue())
     try:
         gan.transfer_style(image_path, styled_image_path)
-        await bot.send_photo(msg.chat.id, photo=InputFile(styled_image_path), caption="Monet styled photo")
+        await bot.send_photo(msg.chat.id, photo=InputFile(styled_image_path), caption="Monet styled image")
         clear_userdir(msg.from_user.id)
     except Exception as error:
         print("Exception caught:", error, file=sys.stderr, flush=True)
@@ -140,7 +140,7 @@ async def handle_document_message(msg: types.Message, state: FSMContext):
         new_file.write(downloaded_file.getvalue())
     try:
         gan.transfer_style(image_path, styled_image_path)
-        await bot.send_document(msg.chat.id, document=InputFile(styled_image_path), caption="Monet styled photo")
+        await bot.send_document(msg.chat.id, document=InputFile(styled_image_path), caption="Monet styled image")
     except Exception as error:
         print("Exception caught:", error, file=sys.stderr, flush=True)
         await msg.answer("Internal server error")
