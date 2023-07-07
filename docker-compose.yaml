@@ -1,29 +1,19 @@
 version: '3.5'
 
 services:
-    styler:
-        image: styler_bot_img:latest
-        container_name: styler_bot
+    painter_bot:
+        image: painter_bot_img:latest
+        build:
+            context: ./
+            dockerfile: ./Dockerfile
+        container_name: painter_bot
 #       restart: always
         env_file: .env
         networks:
-            - styler_net
+            - painter_net
         volumes:
             - ./source:/root/project
             - ./checkpoint:/var/tmp/checkpoint
 
-#   db:
-#       image: postgres
-#       container_name: styler_db
-#       restart: always
-#       ports:
-#           - "5432:5432"
-#       environment:
-#           - POSTGRES_USER=postgres
-#           - POSTGRES_PASSWORD=thoh7eTh
-#           - POSTGRES_DB=converty
-#       networks:
-#           - styler_net
-
 networks:
-    styler_net:
+    painter_net:

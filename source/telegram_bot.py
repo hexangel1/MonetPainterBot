@@ -47,7 +47,7 @@ async def handle_start(msg: types.Message, state: FSMContext):
     """
     os.makedirs(f"storage/{msg.from_user.id}/", exist_ok=True, mode=0o755)
     await CustomStates.bot_started.set()
-    await msg.answer("Hi, dear {msg.from_user.first_name}! 😎\n"
+    await msg.answer(f"Hi, dear {msg.from_user.first_name}! 😎\n"
                      "I am Monet Painter Bot 🤖\n"
                      "Use /help command to find out what I can do\n", reply_markup=keyboard)
 
@@ -61,8 +61,7 @@ async def handle_stop(msg: types.Message, state: FSMContext):
     """
     shutil.rmtree(f"storage/{msg.from_user.id}/", ignore_errors=True)
     await state.finish()
-    await msg.answer("Goodbye, dear {fname}".format(fname=msg.from_user.first_name),
-                     reply_markup=ReplyKeyboardRemove())
+    await msg.answer(f"Goodbye, dear {msg.from_user.first_name}", reply_markup=ReplyKeyboardRemove())
 
 
 @dp.message_handler(commands=['help'], state='*')

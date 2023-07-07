@@ -6,7 +6,7 @@ stop:
 	docker-compose stop
 
 build:
-	docker build -t styler_bot_img .
+	docker-compose build
 
 entry:
-	docker exec -it styler_bot bash
+	docker exec -it painter_bot bash
