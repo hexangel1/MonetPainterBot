@@ -29,5 +29,7 @@ Telegram бот, позволяющий придавать изображени�
 после обработки изображения, бот ответит стилизованным изображением.
 * Перед отправкой следующей картинки необходимо 
 также отправить команду `/transfer_style` или нажать на кнопку.
-
 <img src="https://github.com/hexangel1/TransferStyleBot/blob/main/screenshots/screenshot1.png" width="200" />
+<img src="https://github.com/hexangel1/TransferStyleBot/blob/main/screenshots/screenshot2.png" width="200" />
+<img src="https://github.com/hexangel1/TransferStyleBot/blob/main/screenshots/screenshot3.png" width="200" />
+<img src="https://github.com/hexangel1/TransferStyleBot/blob/main/screenshots/screenshot4.png" width="200" />
