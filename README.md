@@ -35,3 +35,15 @@ Telegram бот, позволяющий придавать изображени�
 <img src="https://github.com/hexangel1/TransferStyleBot/blob/main/screenshots/screenshot3.png" width="200" />
 <img src="https://github.com/hexangel1/TransferStyleBot/blob/main/screenshots/screenshot4.png" width="200" />
 </p>
+<p>
+<img src="https://github.com/hexangel1/TransferStyleBot/blob/main/screenshots/screenshot1.png" width="200" />
+<img src="https://github.com/hexangel1/TransferStyleBot/blob/main/screenshots/screenshot2.png" width="200" />
+<img src="https://github.com/hexangel1/TransferStyleBot/blob/main/screenshots/screenshot3.png" width="200" />
+<img src="https://github.com/hexangel1/TransferStyleBot/blob/main/screenshots/screenshot4.png" width="200" />
+</p>
+<p>
+<img src="https://github.com/hexangel1/TransferStyleBot/blob/main/screenshots/screenshot1.png" width="200" />
+<img src="https://github.com/hexangel1/TransferStyleBot/blob/main/screenshots/screenshot2.png" width="200" />
+<img src="https://github.com/hexangel1/TransferStyleBot/blob/main/screenshots/screenshot3.png" width="200" />
+<img src="https://github.com/hexangel1/TransferStyleBot/blob/main/screenshots/screenshot4.png" width="200" />
+</p>
