@@ -219,7 +219,6 @@ class CycleGAN(object):
 
     def transfer_style(self, image_path, output_path):
         transform2Tensor = transforms.Compose([
-            transforms.Resize(600),
             transforms.ToTensor(),
             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
         ])
@@ -227,12 +226,8 @@ class CycleGAN(object):
 
         with Image.open(image_path, "r") as image:
             img_tensor = transform2Tensor(image)
-        print(img_tensor.shape, flush=True)
         with torch.no_grad():
             pred_monet = self.gen_ptm(img_tensor.to(self.device)).cpu().detach()
-            pred2 = self.disc_p(img_tensor.to(self.device)).cpu().detach()
-        print(pred2.shape, flush=True)
-        print(pred_monet.shape, flush=True)
         pred_monet = unnorm(pred_monet)
         image_monet = transform2Image(pred_monet).convert("RGB")
         image_monet.save(output_path, "PNG")
